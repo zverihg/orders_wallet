@@ -99,7 +99,7 @@ type_defs = """
         status: String!
         totalAmount: Decimal!
         items: [OrderItem!]!
-        createdAt: DateTime!
+        createdAt: DateTime
     }
 
     type OrderItem {
@@ -122,17 +122,19 @@ order_item = ObjectType("OrderItem")
 
 
 @query.field("order")
-def resolve_order(_, info, id: str):
+def resolve_order(_, info, id):
     """Resolve order query."""
     order_service = OrderService()
-    order_domain = order_service.get_order(UUID(id))
+    # id is already a UUID from the scalar parser
+    order_id = id if isinstance(id, UUID) else UUID(id)
+    order_domain = order_service.get_order(order_id)
     if not order_domain:
         return None
     return _order_to_dict(order_domain)
 
 
 @query.field("ordersByCustomer")
-def resolve_orders_by_customer(_, info, customerId: str, limit: int = 50, offset: int = 0):
+def resolve_orders_by_customer(_, info, customerId, limit: int = 50, offset: int = 0):
     """Resolve orders by customer query with pagination."""
     # Validate pagination limits
     if limit > 100:
@@ -143,7 +145,9 @@ def resolve_orders_by_customer(_, info, customerId: str, limit: int = 50, offset
         offset = 0
 
     order_service = OrderService()
-    orders = order_service.get_orders_by_customer(UUID(customerId), limit=limit + 1, offset=offset)
+    # customerId is already a UUID from the scalar parser
+    customer_id = customerId if isinstance(customerId, UUID) else UUID(customerId)
+    orders = order_service.get_orders_by_customer(customer_id, limit=limit + 1, offset=offset)
     
     has_more = len(orders) > limit
     if has_more:
@@ -166,7 +170,7 @@ def resolve_wallet_balance(_, info, customerId: str):
     # #region agent log
     try:
         log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H3", "location": "schema.py:162", "message": "resolve_wallet_balance_entry", "data": {"customer_id": customerId}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
             f.write(json.dumps(log_entry) + "\n")
     except: pass
     # #endregion
@@ -176,7 +180,7 @@ def resolve_wallet_balance(_, info, customerId: str):
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H3", "location": "schema.py:169", "message": "resolve_wallet_balance_success", "data": {"balance": str(result.get("balance", "N/A"))}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -185,7 +189,7 @@ def resolve_wallet_balance(_, info, customerId: str):
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H3", "location": "schema.py:175", "message": "resolve_wallet_balance_exception", "data": {"exception_type": type(e).__name__, "exception_msg": str(e)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -198,7 +202,7 @@ def resolve_create_order(_, info, input: dict):
     # #region agent log
     try:
         log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H1", "location": "schema.py:169", "message": "resolve_create_order_entry", "data": {"customer_id": input.get("customerId"), "items_count": len(input.get("items", []))}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
             f.write(json.dumps(log_entry) + "\n")
     except: pass
     # #endregion
@@ -212,7 +216,7 @@ def resolve_create_order(_, info, input: dict):
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H1", "location": "schema.py:177", "message": "resolve_create_order_success", "data": {"order_id": str(order_id)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -224,7 +228,7 @@ def resolve_create_order(_, info, input: dict):
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H1", "location": "schema.py:186", "message": "resolve_create_order_exception", "data": {"exception_type": type(e).__name__, "exception_msg": str(e)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -232,22 +236,24 @@ def resolve_create_order(_, info, input: dict):
 
 
 @mutation.field("capturePayment")
-def resolve_capture_payment(_, info, orderId: str):
+def resolve_capture_payment(_, info, orderId):
     """Resolve capture payment mutation."""
     # #region agent log
     try:
-        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:183", "message": "resolve_capture_payment_entry", "data": {"order_id": orderId}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:235", "message": "resolve_capture_payment_entry", "data": {"order_id": str(orderId), "order_id_type": type(orderId).__name__}, "timestamp": int(time.time() * 1000)}
+        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
             f.write(json.dumps(log_entry) + "\n")
     except: pass
     # #endregion
     order_service = OrderService()
     try:
-        result = order_service.capture_payment(UUID(orderId))
+        # orderId is already a UUID from the scalar parser
+        order_id = orderId if isinstance(orderId, UUID) else UUID(orderId)
+        result = order_service.capture_payment(order_id)
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:190", "message": "resolve_capture_payment_success", "data": {"status": result.get("status", "N/A")}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -259,7 +265,7 @@ def resolve_capture_payment(_, info, orderId: str):
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:254", "message": "returning_capture_payment_result", "data": {"order_id_type": type(order_id).__name__, "order_id_str_type": type(order_id_str).__name__, "order_id_str": order_id_str}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -274,7 +280,7 @@ def resolve_capture_payment(_, info, orderId: str):
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:201", "message": "resolve_capture_payment_exception", "data": {"exception_type": type(e).__name__, "exception_msg": str(e)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -282,10 +288,12 @@ def resolve_capture_payment(_, info, orderId: str):
 
 
 @mutation.field("refundOrder")
-def resolve_refund_order(_, info, orderId: str):
+def resolve_refund_order(_, info, orderId):
     """Resolve refund order mutation."""
     refund_service = RefundService()
-    result = refund_service.refund_order(UUID(orderId))
+    # orderId is already a UUID from the scalar parser
+    order_id = orderId if isinstance(orderId, UUID) else UUID(orderId)
+    result = refund_service.refund_order(order_id)
     # Convert UUID to string to avoid serialization issues
     order_id = result["order_id"]
     order_id_str = str(order_id) if isinstance(order_id, UUID) else order_id
@@ -347,7 +355,7 @@ def serialize_uuid(value):
     # #region agent log
     try:
         log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:327", "message": "serialize_uuid_called", "data": {"value_type": type(value).__name__, "value": str(value) if hasattr(value, '__str__') else repr(value)}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
             f.write(json.dumps(log_entry) + "\n")
     except: pass
     # #endregion
@@ -384,17 +392,20 @@ def serialize_datetime(value):
     """Serialize DateTime to ISO format string."""
     # #region agent log
     try:
-        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:381", "message": "serialize_datetime_called", "data": {"value_type": type(value).__name__, "is_uuid": isinstance(value, UUID), "is_datetime": isinstance(value, datetime)}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:382", "message": "serialize_datetime_called", "data": {"value_type": type(value).__name__, "is_uuid": isinstance(value, UUID), "is_datetime": isinstance(value, datetime), "is_none": value is None}, "timestamp": int(time.time() * 1000)}
+        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
             f.write(json.dumps(log_entry) + "\n")
     except: pass
     # #endregion
+    # Handle None values
+    if value is None:
+        return None
     # Don't try to serialize UUID objects as datetime
     if isinstance(value, UUID):
         # #region agent log
         try:
-            log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:391", "message": "datetime_serializer_received_uuid", "data": {"value": str(value)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:393", "message": "datetime_serializer_received_uuid", "data": {"value": str(value)}, "timestamp": int(time.time() * 1000)}
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -409,21 +420,26 @@ def parse_datetime_value(value):
     """Parse DateTime from string."""
     # #region agent log
     try:
-        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:365", "message": "parse_datetime_value_called", "data": {"value_type": type(value).__name__, "is_uuid": isinstance(value, UUID)}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:409", "message": "parse_datetime_value_called", "data": {"value_type": type(value).__name__, "is_uuid": isinstance(value, UUID), "is_none": value is None}, "timestamp": int(time.time() * 1000)}
+        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
             f.write(json.dumps(log_entry) + "\n")
     except: pass
     # #endregion
-    # Don't try to parse UUID objects as datetime
+    # Handle None values
+    if value is None:
+        return None
+    # Don't try to parse UUID objects as datetime - check BEFORE any string operations
     if isinstance(value, UUID):
         # #region agent log
         try:
-            log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:375", "message": "datetime_parser_received_uuid", "data": {"value": str(value)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:420", "message": "datetime_parser_received_uuid", "data": {"value": str(value)}, "timestamp": int(time.time() * 1000)}
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
         raise ValueError(f"Expected datetime string, got UUID: {value}")
+    if isinstance(value, datetime):
+        return value
     if isinstance(value, str):
         return datetime.fromisoformat(value.replace('Z', '+00:00'))
     return value

@@ -23,7 +23,7 @@ from uuid import uuid4, UUID
 import time
 
 # #region agent log
-DEBUG_LOG_PATH = "/home/zverihg/Documents/orders_wallet/.cursor/debug.log"
+DEBUG_LOG_PATH = "/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log"
 def _debug_log(session_id, run_id, hypothesis_id, location, message, data):
     try:
         log_entry = {

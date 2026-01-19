@@ -19,6 +19,8 @@ from main.infra.models import (
 )
 from main.infra.event_store import EventStoreRepository
 import logging
+import json
+import time
 logger = logging.getLogger(__name__)
 
 
@@ -27,7 +29,22 @@ class CustomerRepository:
 
     def get_by_id(self, customer_id: str) -> CustomerORM | None:
         """Get customer by ID."""
-        return CustomerORM.objects.filter(id=customer_id).first()
+        # #region agent log
+        try:
+            log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H1", "location": "repositories.py:28", "message": "customer_get_by_id_entry", "data": {"customer_id": customer_id}, "timestamp": int(time.time() * 1000)}
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
+                f.write(json.dumps(log_entry) + "\n")
+        except: pass
+        # #endregion
+        result = CustomerORM.objects.filter(id=customer_id).first()
+        # #region agent log
+        try:
+            log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H1", "location": "repositories.py:30", "message": "customer_get_by_id_result", "data": {"customer_found": result is not None, "customer_id": customer_id}, "timestamp": int(time.time() * 1000)}
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
+                f.write(json.dumps(log_entry) + "\n")
+        except: pass
+        # #endregion
+        return result
 
     def create(self, name: str) -> UUID:
         """Create new customer."""
@@ -93,19 +110,21 @@ class OrderRepository:
 
     def _to_domain(self, order_orm: OrderORM) -> Order:
         """Convert ORM model to domain entity."""
-        order = Order(
-            id=order_orm.id,
-            customer_id=order_orm.customer_id,
-            status=OrderStatus(order_orm.status),
-        )
-        
-        # Add items
+        # Build items list directly (bypass add_item() validation for loading from DB)
+        items = []
         for item_orm in order_orm.items.all():
-            order.add_item(
+            items.append(OrderItem(
                 product_id=item_orm.product_id,
                 quantity=item_orm.quantity,
                 price=item_orm.price,
-            )
+            ))
+        
+        order = Order(
+            id=order_orm.id,
+            customer_id=order_orm.customer_id,
+            items=items,
+            status=OrderStatus(order_orm.status),
+        )
         
         return order
 
@@ -208,7 +227,7 @@ class WalletRepository:
     def _to_domain(self, wallet_orm: WalletORM) -> Wallet:
         """Convert ORM model to domain entity."""
         # Calculate balance from events
-        balance = self.event_store_repo.calculate_wallet_balance(wallet_orm.id)
+        balance = self.event_store_repo.calculate_wallet_balance(wallet_orm)
         
         wallet = Wallet(
             id=wallet_orm.id,

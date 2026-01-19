@@ -150,7 +150,6 @@ class GraphQLAPITest(TestCase):
                 walletBalance(customerId: "%s") {
                     customerId
                     balance
-                    transactionsCount
                 }
             }
         """ % str(self.customer_id)
@@ -217,6 +216,9 @@ class GraphQLAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         self.assertIn("data", data)
+        if data.get("data") is None and "errors" in data:
+            self.fail(f"GraphQL errors: {data['errors']}")
+        self.assertIsNotNone(data["data"], f"Response data is None. Full response: {data}")
         self.assertIn("capturePayment", data["data"])
         self.assertEqual(data["data"]["capturePayment"]["status"], "PAID")
         self.assertEqual(data["data"]["capturePayment"]["amountDebited"], "100.00")

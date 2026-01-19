@@ -5,3 +5,5 @@ ipython
 ariadne>=0.20.0
 graphql-core>=3.2.0
 requests>=2.31.0
+pytest
+pytest-django

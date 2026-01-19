@@ -61,7 +61,7 @@ class OrderService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H1", "location": "services.py:53", "message": "create_order_entry", "data": {"customer_id": customer_id}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -70,7 +70,7 @@ class OrderService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H1", "location": "services.py:60", "message": "customer_lookup_result", "data": {"customer_found": customer is not None}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -115,7 +115,7 @@ class OrderService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "services.py:97", "message": "capture_payment_entry", "data": {"order_id": str(order_id)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -124,7 +124,7 @@ class OrderService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "services.py:100", "message": "order_lookup", "data": {"order_found": order is not None, "order_status": order.status.value if order else "N/A"}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -136,7 +136,7 @@ class OrderService:
             # #region agent log
             try:
                 log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "services.py:105", "message": "confirming_draft_order", "data": {}, "timestamp": int(time.time() * 1000)}
-                with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+                with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                     f.write(json.dumps(log_entry) + "\n")
             except: pass
             # #endregion
@@ -277,7 +277,7 @@ class WalletService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H3", "location": "services.py:238", "message": "get_balance_entry", "data": {"customer_id": customer_id}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -286,7 +286,7 @@ class WalletService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H3", "location": "services.py:241", "message": "customer_lookup_balance", "data": {"customer_found": customer is not None}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -297,7 +297,7 @@ class WalletService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H3", "location": "services.py:246", "message": "wallet_lookup", "data": {"wallet_found": wallet is not None}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
@@ -311,7 +311,7 @@ class WalletService:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H3", "location": "services.py:254", "message": "balance_calculated", "data": {"balance": str(balance)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion

@@ -214,7 +214,7 @@ class OrdersWalletGraphQLView:
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H2", "location": "views.py:207", "message": "graphql_execution_result", "data": {"success": success, "has_errors": "errors" in result if result else False}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/Documents/orders_wallet/.cursor/debug.log", "a") as f:
+            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion

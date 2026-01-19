@@ -7,6 +7,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: order-alpine
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=orders_wallet.settings
     depends_on:
       - pgdb
 

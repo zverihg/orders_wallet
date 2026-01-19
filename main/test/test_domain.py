@@ -65,6 +65,7 @@ class OrderTest(TestCase):
     def test_cannot_add_item_to_non_draft_order(self):
         """Test that items can only be added to draft orders."""
         order = Order(customer_id=uuid4())
+        order.add_item(uuid4(), quantity=1, price=Decimal("50.00"))
         order.confirm()
         with self.assertRaises(ValueError):
             order.add_item(uuid4(), quantity=1, price=Decimal("50.00"))

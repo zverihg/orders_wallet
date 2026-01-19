@@ -18,11 +18,13 @@ def wallet_lock(wallet_id: UUID):
             pass
     """
     # Convert UUID to int for advisory lock
-    lock_id = int(wallet_id.hex[:16], 16)  # Use first 16 hex chars as int
-    
+    # Use PostgreSQL hashtext to convert UUID string to a consistent bigint
     with connection.cursor() as cursor:
-        # Acquire lock
-        cursor.execute("SELECT pg_advisory_xact_lock(%s)", [lock_id])
+        # Acquire lock using hashtext to ensure we get a valid bigint
+        cursor.execute(
+            "SELECT pg_advisory_xact_lock(hashtext(%s)::bigint)",
+            [str(wallet_id)]
+        )
         try:
             yield
         finally:
