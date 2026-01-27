@@ -9,19 +9,9 @@ from uuid import UUID
 from django.db import transaction
 from django.utils import timezone
 
-from main.domain.events import (
-    OrderCreated,
-    OrderConfirmed,
-    OrderPaid,
-    OrderRefunded,
-    OrderCancelled,
-    WalletCreated,
-    WalletDebited,
-    WalletCredited,
-)
 from main.infra.outbox import OutboxRepository
 from main.infra.read_models import OrderSummary, WalletView
-from main.infra.models import CustomerORM, OrderORM
+from main.infra.models import CustomerORM
 
 
 class Projector:

@@ -2,7 +2,6 @@
 PII (Personally Identifiable Information) masking utilities.
 """
 import re
-from typing import Any
 
 
 def mask_email(email: str) -> str:

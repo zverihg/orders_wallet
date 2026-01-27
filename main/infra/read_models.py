@@ -3,8 +3,7 @@ Read models (projections) for CQRS.
 """
 from __future__ import annotations
 
-from decimal import Decimal
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from django.db import models
 
@@ -41,4 +40,3 @@ class WalletView(TimeStampedModel):
         indexes = [
             models.Index(fields=("customer_id",)),
         ]
-

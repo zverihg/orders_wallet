@@ -4,7 +4,7 @@ Distributed locks using PostgreSQL advisory locks.
 from contextlib import contextmanager
 from uuid import UUID
 
-from django.db import connection, transaction
+from django.db import connection
 
 
 @contextmanager

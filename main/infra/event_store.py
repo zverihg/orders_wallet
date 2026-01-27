@@ -4,10 +4,9 @@ Event store for Event Sourcing (lightweight).
 from __future__ import annotations
 
 from decimal import Decimal
-from datetime import datetime
 from uuid import UUID, uuid4
 
-from django.db import models, transaction
+from django.db import models
 
 from main.domain.events import DomainEvent, EventVersion
 from main.domain.wallet import TransactionType
@@ -16,7 +15,6 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-
 
 
 class EventStore(TimeStampedModel):

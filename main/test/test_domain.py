@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 from django.test import TestCase
 
 from main.domain.order import Order, OrderItem, OrderStatus
-from main.domain.wallet import Wallet, WalletTransaction, TransactionType
+from main.domain.wallet import Wallet, TransactionType
 
 
 class OrderItemTest(TestCase):

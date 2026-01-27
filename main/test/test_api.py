@@ -3,13 +3,18 @@ Integration tests for GraphQL API.
 """
 import json
 from decimal import Decimal
-from uuid import uuid4
 
 from django.test import TestCase
-from django.urls import reverse
 
-from main.infra.models import CustomerORM, WalletORM
+from main.infra.models import WalletORM, WalletTransactionORM
 from main.infra.repositories import CustomerRepository
+
+from main.infra.event_store import EventStoreRepository
+
+from main.domain.wallet import TransactionType
+from main.domain.events import WalletCredited
+from uuid import uuid4
+from django.utils import timezone
 
 
 class GraphQLAPITest(TestCase):
@@ -26,8 +31,7 @@ class GraphQLAPITest(TestCase):
             customer_id=self.customer_id,
         )
         # Create initial credit transaction to set balance to 1000.00
-        from main.infra.models import WalletTransactionORM
-        from main.domain.wallet import TransactionType
+
         WalletTransactionORM.objects.create(
             wallet=wallet_orm,
             transaction_type=TransactionType.CREDIT.value,
@@ -35,10 +39,7 @@ class GraphQLAPITest(TestCase):
             description="Initial balance",
         )
         # Create corresponding event
-        from main.infra.event_store import EventStoreRepository
-        from main.domain.events import WalletCredited
-        from uuid import uuid4
-        from django.utils import timezone
+
         event_store = EventStoreRepository()
         event = WalletCredited(
             event_id=uuid4(),
