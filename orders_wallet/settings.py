@@ -39,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'django_extensions',
-    'main',
+    'main.infra.models.service_models',
+    'main.infra.models.customer_models',
+    'main.infra.models.order_models',
+    'main.infra.models.wallet_models',
 ]
 
 MIDDLEWARE = [

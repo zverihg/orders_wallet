@@ -1,0 +1,3 @@
+input GetWalletInputs {
+  id: ID!
+}

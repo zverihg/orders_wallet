@@ -154,7 +154,7 @@ def resolve_orders_by_customer(_, info, customerId, limit: int = 50, offset: int
         orders = orders[:limit]
 
     # Get total count (optimized query)
-    from main.infra.models import OrderORM
+    from main.infra.models.models import OrderORM
     total_count = OrderORM.objects.filter(customer_id=UUID(customerId)).count()
 
     return {
@@ -353,11 +353,6 @@ def parse_decimal_value(value):
 def serialize_uuid(value):
     """Serialize UUID to string."""
     # #region agent log
-    try:
-        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:327", "message": "serialize_uuid_called", "data": {"value_type": type(value).__name__, "value": str(value) if hasattr(value, '__str__') else repr(value)}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
-    except: pass
     # #endregion
     # Handle both UUID objects and strings
     if isinstance(value, UUID):
@@ -418,24 +413,12 @@ def serialize_datetime(value):
 @datetime_scalar.value_parser
 def parse_datetime_value(value):
     """Parse DateTime from string."""
-    # #region agent log
-    try:
-        log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:409", "message": "parse_datetime_value_called", "data": {"value_type": type(value).__name__, "is_uuid": isinstance(value, UUID), "is_none": value is None}, "timestamp": int(time.time() * 1000)}
-        with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
-    except: pass
-    # #endregion
-    # Handle None values
+
     if value is None:
         return None
     # Don't try to parse UUID objects as datetime - check BEFORE any string operations
     if isinstance(value, UUID):
         # #region agent log
-        try:
-            log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H4", "location": "schema.py:420", "message": "datetime_parser_received_uuid", "data": {"value": str(value)}, "timestamp": int(time.time() * 1000)}
-            with open("/home/zverihg/PycharmProjects/orders_wallet/.cursor/debug.log", "a") as f:
-                f.write(json.dumps(log_entry) + "\n")
-        except: pass
         # #endregion
         raise ValueError(f"Expected datetime string, got UUID: {value}")
     if isinstance(value, datetime):

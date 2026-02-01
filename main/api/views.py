@@ -13,9 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from main.api.schema import schema
-from main.api.middleware import ErrorHandler, ValidationError
-from main.infra.models import IdempotencyKey
-from main.infra.pii_masker import mask_pii_in_dict, mask_uuid
+from main.api.middleware import ErrorHandler
+from main.infra.models.service_models.models import IdempotencyKey
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +193,7 @@ class OrdersWalletGraphQLView:
         if request.method == "GET":
             # For GET requests, return schema info or empty response
             return JsonResponse({"message": "GraphQL endpoint. Use POST for queries."})
-        
+
         # Parse request body
         try:
             data = json.loads(request.body)
@@ -203,14 +202,14 @@ class OrdersWalletGraphQLView:
                 {"error": {"message": "Invalid JSON"}},
                 status=400
             )
-        
+
         # Execute GraphQL query
         success, result = graphql_sync(
             schema,
             data,
             context_value={"request": request}
         )
-        
+
         # #region agent log
         try:
             log_entry = {"sessionId": "debug-session", "runId": "run1", "hypothesisId": "H2", "location": "views.py:207", "message": "graphql_execution_result", "data": {"success": success, "has_errors": "errors" in result if result else False}, "timestamp": int(time.time() * 1000)}
@@ -218,7 +217,7 @@ class OrdersWalletGraphQLView:
                 f.write(json.dumps(log_entry) + "\n")
         except: pass
         # #endregion
-        
+
         status_code = 200 if success else 400
         return JsonResponse(result, status=status_code)
 

@@ -40,7 +40,7 @@ def main():
     # For now, we'll test with a random UUID and see what happens
     
     customer_id = str(uuid4())
-    print(f"\n[Test 2] Testing with customer ID: {customer_id}")
+    print(f"\n[Test 2] Testing with  ID: {customer_id}")
     
     # Test 3: Try to create order (will fail if customer doesn't exist)
     print("\n[Test 3] Create order (may fail if customer doesn't exist)")

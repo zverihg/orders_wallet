@@ -6,10 +6,10 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from main.infra.models import WalletORM, WalletTransactionORM
+from main.infra.models.models import WalletORM, WalletTransactionORM
 from main.infra.repositories import CustomerRepository
 
-from main.infra.event_store import EventStoreRepository
+from infra.models.event_store_models.models.event_store import EventStoreRepository
 
 from main.domain.wallet import TransactionType
 from main.domain.events import WalletCredited

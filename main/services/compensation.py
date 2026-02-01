@@ -13,7 +13,7 @@ from main.domain.order import OrderStatus
 from main.domain.events import OrderRefunded
 from main.infra.repositories import OrderRepository, WalletRepository
 from main.infra.outbox import OutboxRepository
-from main.infra.event_store import EventStoreRepository
+from infra.models.event_store_models.models.event_store import EventStoreRepository
 from main.infra.locks import wallet_lock
 
 
