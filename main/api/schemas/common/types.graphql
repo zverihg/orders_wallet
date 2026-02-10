@@ -1,7 +1,6 @@
-type OrdersPage {
+type OrdersByCustomerResult {
   orders: [Order!]!
   totalCount: Int!
-  hasMore: Boolean!
 }
 
 input CreateOrderInput {

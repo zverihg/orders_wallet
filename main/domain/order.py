@@ -4,8 +4,7 @@ Domain model for Order aggregate.
 from __future__ import annotations
 
 from decimal import Decimal
-from enum import Enum
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from django.db import transaction
 
@@ -48,7 +47,50 @@ def create_order(customer_id: UUID, items_list):
                 price=item["price"],
             )
 
-
+    return order.id, order.status
 
 def get_order_by_id(order_id: UUID):
-    return Order.objects.get(id=order_id)
+    order = Order.objects.filter(id=order_id).select_related("customer").prefetch_related("items").first()
+
+    items = order.items.all()
+
+    items_dict = [
+        {
+        "productId":item.product_id,
+        "quantity":item.quantity,
+        "price":item.price
+        }
+        for item in items]
+
+    data = {
+        "id": order.id,
+        "customerId": order.customer_id,
+        "status": order.status,
+        "totalAmount": order.total_amount,
+        "items": items_dict,
+        "createdAt": order.created_at,
+    }
+
+    return data
+
+
+def get_orders_by_customer(customerId):
+
+    orders = Order.objects.filter(customer_id=customerId)
+
+    orders_dict = [
+        {
+        "id":order.id,
+        "customerId":order.customer_id,
+        "status":order.status,
+        "totalAmount":order.total_amount,
+        "createdAt":order.created_at,
+        }
+        for order in orders]
+
+    data = {
+        "orders": orders_dict,
+        "totalCount": len(orders)
+    }
+
+    return data

@@ -14,7 +14,11 @@ from uuid import UUID
 from datetime import datetime
 from pathlib import Path
 
-from main.domain.order import create_order
+from main.domain.order import (
+    create_order,
+    get_order_by_id,
+    get_orders_by_customer
+)
 
 # Load schema from .graphql files
 SCHEMAS_DIR = Path(__file__).parent / "schemas"
@@ -28,30 +32,29 @@ query = QueryType()
 mutation = MutationType()
 order = ObjectType("Order")
 order_item = ObjectType("OrderItem")
+orders_by_customer_result = ObjectType("OrdersByCustomerResult")
 
 
 @query.field("getOrder")
-def resolve_order(_, info, id):
+def resolve_getOrder(_, info, id):
     """Resolve order query."""
-    return None
+
+    order = get_order_by_id(id)
+
+    return order
 
 
-@query.field("ordersByCustomer")
-def resolve_orders_by_customer(_, info, customerId, limit: int = 50, offset: int = 0):
+@query.field("OrdersByCustomer")
+def resolve_orders_by_customer(_, info, customerId):
     """Resolve orders by customer query with pagination."""
-    return {"orders": [], "totalCount": 0, "hasMore": False}
 
-
-@query.field("walletBalance")
-def resolve_wallet_balance(_, info, customerId: str):
-    """Resolve wallet balance query."""
-    return {"customerId": customerId, "balance": "0"}
+    data = get_orders_by_customer(customerId)
+    return data
 
 
 @mutation.field("createOrder")
 def resolve_create_order(_, info, input: dict):
     """Resolve create order mutation."""
-
 
     customer_id = UUID(input["customerId"])
     items_input = input["items"]
@@ -71,6 +74,7 @@ def resolve_create_order(_, info, input: dict):
 @mutation.field("capturePayment")
 def resolve_capture_payment(_, info, orderId):
     """Resolve capture payment mutation."""
+
     return {
         "orderId": str(orderId),
         "status": "",
@@ -87,6 +91,12 @@ def resolve_refund_order(_, info, orderId):
         "status": "",
         "amountRefunded": "0",
     }
+
+
+@query.field("walletBalance")
+def resolve_wallet_balance(_, info, customerId: str):
+    """Resolve wallet balance query."""
+    return {"customerId": customerId, "balance": "0"}
 
 
 @order.field("items")
@@ -171,12 +181,6 @@ def parse_datetime_value(value):
     return value
 
 
-orders_page = ObjectType("OrdersPage")
-
-@orders_page.field("orders")
-def resolve_orders_page_orders(page_dict, info):
-    """Resolve orders from page."""
-    return []
 
 # Create executable schema
 schema = make_executable_schema(
@@ -185,7 +189,7 @@ schema = make_executable_schema(
     mutation,
     order,
     order_item,
-    orders_page,
+    orders_by_customer_result,
     datetime_scalar,
     decimal_scalar,
     uuid_scalar,
