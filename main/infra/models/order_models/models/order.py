@@ -17,6 +17,7 @@ class Order(TimeStampedModel):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+
     customer = models.ForeignKey(
         Customer,
         on_delete=models.PROTECT,

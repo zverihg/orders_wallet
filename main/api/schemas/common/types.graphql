@@ -1,0 +1,55 @@
+type OrdersPage {
+  orders: [Order!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+input CreateOrderInput {
+  customerId: String!
+  items: [OrderItemInput!]!
+}
+
+input OrderItemInput {
+  productId: String!
+  quantity: Int!
+  price: Decimal!
+}
+
+type CreateOrderPayload {
+  orderId: String!
+  status: String!
+}
+
+type CapturePaymentPayload {
+  orderId: UUID!
+  status: String!
+  amountDebited: Decimal!
+  bonusCredited: Decimal!
+}
+
+type RefundOrderPayload {
+  orderId: UUID!
+  status: String!
+  amountRefunded: Decimal!
+}
+
+type Order {
+  id: UUID!
+  customerId: UUID!
+  status: String!
+  totalAmount: Decimal!
+  items: [OrderItem!]!
+  createdAt: DateTime
+}
+
+type OrderItem {
+  productId: UUID!
+  quantity: Int!
+  price: Decimal!
+  subtotal: Decimal!
+}
+
+type WalletBalance {
+  customerId: String!
+  balance: Decimal!
+}

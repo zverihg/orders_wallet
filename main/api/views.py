@@ -13,7 +13,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from main.api.schema import schema
-from main.api.middleware import ErrorHandler
 from main.infra.models.service_models.models import IdempotencyKey
 
 logger = logging.getLogger(__name__)

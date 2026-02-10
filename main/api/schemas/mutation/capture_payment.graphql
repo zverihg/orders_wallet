@@ -1,0 +1,3 @@
+extend type Mutation {
+  capturePayment(orderId: UUID!): CapturePaymentPayload!
+}

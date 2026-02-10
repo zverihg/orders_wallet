@@ -1,0 +1,7 @@
+type Query {
+  _base: Boolean
+}
+
+type Mutation {
+  _base: Boolean
+}

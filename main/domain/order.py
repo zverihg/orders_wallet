@@ -7,100 +7,48 @@ from decimal import Decimal
 from enum import Enum
 from uuid import UUID, uuid4
 
+from django.db import transaction
 
-class OrderStatus(str, Enum):
-    """Order status enumeration."""
-    DRAFT = "DRAFT"
-    PENDING = "PENDING"
-    PAID = "PAID"
-    REFUNDED = "REFUNDED"
-    CANCELLED = "CANCELLED"
+from main.infra.models.customer_models.models import Customer
+from main.infra.models.order_models.models import Order
+from main.infra.models.order_models.models import OrderItem
 
 
-class OrderItem:
-    """Order line item value object."""
-    
-    def __init__(self, product_id: UUID, quantity: int, price: Decimal):
-        if quantity <= 0:
-            raise ValueError("Quantity must be positive")
-        if price < 0:
-            raise ValueError("Price must be non-negative")
-        
-        self.product_id = product_id
-        self.quantity = quantity
-        self.price = price
-    
-    @property
-    def subtotal(self) -> Decimal:
-        """Calculate item subtotal."""
-        return self.price * self.quantity
+
+def get_total_amount(items_list) -> Decimal:
+
+    total = Decimal("0.00")
+
+    for item in items_list:
+        total += item["price"] * item["quantity"]
+
+    return total
 
 
-class Order:
-    """Order aggregate root."""
-    
-    def __init__(
-        self,
-        id: UUID | None = None,
-        customer_id: UUID | None = None,
-        items: list[OrderItem] | None = None,
-        status: OrderStatus = OrderStatus.DRAFT,
-    ):
-        self.id = id or uuid4()
-        self.customer_id = customer_id
-        self._items = items or []
-        self._status = status
-    
-    @property
-    def items(self) -> list[OrderItem]:
-        """Get order items (immutable)."""
-        return list(self._items)
-    
-    @property
-    def status(self) -> OrderStatus:
-        """Get order status."""
-        return self._status
-    
-    @property
-    def total_amount(self) -> Decimal:
-        """Calculate total order amount."""
-        return sum(item.subtotal for item in self._items)
-    
-    def add_item(self, product_id: UUID, quantity: int, price: Decimal) -> None:
-        """Add item to order."""
-        if self._status != OrderStatus.DRAFT:
-            raise ValueError("Can only add items to draft orders")
-        
-        item = OrderItem(product_id, quantity, price)
-        self._items.append(item)
-    
-    def confirm(self) -> None:
-        """Confirm order (move from DRAFT to PENDING)."""
-        if self._status != OrderStatus.DRAFT:
-            raise ValueError("Can only confirm draft orders")
-        if not self._items:
-            raise ValueError("Cannot confirm empty order")
-        
-        self._status = OrderStatus.PENDING
-    
-    def mark_paid(self) -> None:
-        """Mark order as paid."""
-        if self._status != OrderStatus.PENDING:
-            raise ValueError("Can only mark pending orders as paid")
-        
-        self._status = OrderStatus.PAID
-    
-    def mark_refunded(self) -> None:
-        """Mark order as refunded."""
-        if self._status != OrderStatus.PAID:
-            raise ValueError("Can only refund paid orders")
-        
-        self._status = OrderStatus.REFUNDED
-    
-    def cancel(self) -> None:
-        """Cancel order."""
-        if self._status in (OrderStatus.PAID, OrderStatus.REFUNDED):
-            raise ValueError("Cannot cancel paid or refunded orders")
-        
-        self._status = OrderStatus.CANCELLED
+def create_order(customer_id: UUID, items_list):
 
+    with transaction.atomic():
+        customer, _ = Customer.objects.get_or_create(
+            id=customer_id,
+            defaults={"name": str(customer_id)},
+        )
+
+        order = Order.objects.create(
+            customer=customer,
+            total_amount=get_total_amount(items_list),
+            status="DRAFT",
+        )
+
+        for item in items_list:
+
+            OrderItem.objects.create(
+                order=order,
+                product_id=item["productId"],
+                quantity=item["quantity"],
+                price=item["price"],
+            )
+
+
+
+def get_order_by_id(order_id: UUID):
+    return Order.objects.get(id=order_id)
