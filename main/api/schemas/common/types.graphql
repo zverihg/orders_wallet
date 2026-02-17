@@ -23,7 +23,6 @@ type CapturePaymentPayload {
   orderId: UUID!
   status: String!
   amountDebited: Decimal!
-  bonusCredited: Decimal!
 }
 
 type RefundOrderPayload {
@@ -51,4 +50,13 @@ type OrderItem {
 type WalletBalance {
   customerId: String!
   balance: Decimal!
+}
+
+type walletOperationsPayload{
+  status: String!
+}
+
+input walletOperationsInput{
+  customerId: UUID!
+  amount: Decimal!
 }

@@ -17,7 +17,15 @@ from pathlib import Path
 from main.domain.order import (
     create_order,
     get_order_by_id,
-    get_orders_by_customer
+    get_orders_by_customer,
+    capture_payment,
+    refund_order
+)
+
+from main.domain.wallet import (
+    get_wallet_balance,
+    wallet_debit,
+    wallet_credit,
 )
 
 # Load schema from .graphql files
@@ -70,35 +78,48 @@ def resolve_create_order(_, info, input: dict):
 
     return {"orderId": str(order_id), "status": order_status}
 
+@query.field("walletBalance")
+def resolve_wallet_balance(_, info, customerId: str):
+    """Resolve wallet balance query."""
+
+    balance = get_wallet_balance(customerId)
+
+    return {"customerId": customerId, "balance": balance}
+
 
 @mutation.field("capturePayment")
-def resolve_capture_payment(_, info, orderId):
+def resolve_capture_payment(_, info, orderId: str):
     """Resolve capture payment mutation."""
 
-    return {
-        "orderId": str(orderId),
-        "status": "",
-        "amountDebited": "0",
-        "bonusCredited": "0",
-    }
+    result = capture_payment(orderId)
 
+    return result
 
 @mutation.field("refundOrder")
 def resolve_refund_order(_, info, orderId):
     """Resolve refund order mutation."""
-    return {
-        "orderId": str(orderId),
-        "status": "",
-        "amountRefunded": "0",
-    }
+
+    result = refund_order(orderId)
+
+    return result
 
 
-@query.field("walletBalance")
-def resolve_wallet_balance(_, info, customerId: str):
-    """Resolve wallet balance query."""
-    return {"customerId": customerId, "balance": "0"}
+@mutation.field("walletDebit")
+def resolve_wallet_debit(_, info, input: dict):
+
+    result = wallet_debit(input["customerId"], input["amount"])
+
+    return result
+
+@mutation.field("walletCredit")
+def resolve_wallet_credit(_, info, input: dict):
+
+    result = wallet_credit(input["customerId"], input["amount"])
+
+    return result
 
 
+# TODO delete
 @order.field("items")
 def resolve_order_items(order_dict, info):
     """Resolve order items."""

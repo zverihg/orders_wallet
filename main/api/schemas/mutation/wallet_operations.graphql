@@ -1,0 +1,7 @@
+extend type Mutation {
+  walletCredit(input: walletOperationsInput!): walletOperationsPayload!
+}
+
+extend type Mutation {
+  walletDebit(input: walletOperationsInput!): walletOperationsPayload!
+}

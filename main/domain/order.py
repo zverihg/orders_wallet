@@ -8,11 +8,12 @@ from uuid import UUID
 
 from django.db import transaction
 
+from main.infra.models.wallet_models.models import WalletTransaction
 from main.infra.models.customer_models.models import Customer
 from main.infra.models.order_models.models import Order
 from main.infra.models.order_models.models import OrderItem
 
-
+from main.domain.wallet import TransactionType
 
 def get_total_amount(items_list) -> Decimal:
 
@@ -94,3 +95,63 @@ def get_orders_by_customer(customerId):
     }
 
     return data
+
+
+def capture_payment(orderId):
+
+    order = Order.objects.get(id=orderId)
+
+    wallet = order.customer.wallet
+
+    balance = Decimal(0)
+    for wallet_transaction in wallet.transactions.all():
+        if wallet_transaction.transaction_type == TransactionType.CREDIT:
+            balance += wallet_transaction.amount
+        elif wallet_transaction.transaction_type == TransactionType.DEBIT:
+            balance -= wallet_transaction.amount
+        else:
+            pass
+
+    if balance < order.total_amount:
+        raise ValueError("Insufficient balance for payment")
+
+    with transaction.atomic():
+
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type=TransactionType.DEBIT,
+            amount=order.total_amount,
+            description=f"Payment for order {order.id}",
+        )
+
+        order.status = "PAID"
+        order.save()
+
+    return {
+        "orderId": str(orderId),
+        "status": order.status,
+        "amountDebited": str(order.total_amount)
+    }
+
+
+def refund_order(orderId:str):
+
+    order = Order.objects.get(id=orderId)
+    wallet = order.customer.wallet
+
+    if order.status != "PAID":
+        raise ValueError("Order is not paid")
+
+    with transaction.atomic():
+
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type=TransactionType.CREDIT,
+            amount=order.total_amount,
+            description=f"Payment for order {order.id}",
+        )
+
+        order.status = "REFUNDED"
+        order.save()
+
+    return {"orderId": str(orderId), "status": order.status}
