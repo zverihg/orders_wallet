@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    """Run administrative tasks."""
+    """Запуск административных задач Django."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'orders_wallet.settings')
     try:
         from django.core.management import execute_from_command_line

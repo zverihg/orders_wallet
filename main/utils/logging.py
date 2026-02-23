@@ -1,5 +1,5 @@
 """
-Custom JSON formatter for logging (without external dependencies).
+Кастомный JSON-форматтер для логирования (без внешних зависимостей).
 """
 import json
 import logging
@@ -7,10 +7,10 @@ from datetime import datetime
 
 
 class JsonFormatter(logging.Formatter):
-    """JSON formatter for structured logging."""
+    """JSON-форматтер для структурированного логирования."""
 
     def format(self, record):
-        """Format log record as JSON."""
+        """Форматирование записи лога в JSON."""
         log_data = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "level": record.levelname,

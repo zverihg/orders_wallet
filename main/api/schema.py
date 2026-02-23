@@ -1,5 +1,5 @@
 """
-GraphQL schema definition using Ariadne.
+Определение GraphQL-схемы с использованием Ariadne.
 """
 from ariadne import (
     QueryType,
@@ -45,7 +45,7 @@ orders_by_customer_result = ObjectType("OrdersByCustomerResult")
 
 @query.field("getOrder")
 def resolve_getOrder(_, info, id):
-    """Resolve order query."""
+    """Резолвер запроса заказа по id."""
 
     order = get_order_by_id(id)
 
@@ -54,7 +54,7 @@ def resolve_getOrder(_, info, id):
 
 @query.field("OrdersByCustomer")
 def resolve_orders_by_customer(_, info, customerId):
-    """Resolve orders by customer query with pagination."""
+    """Резолвер запроса заказов по клиенту с пагинацией."""
 
     data = get_orders_by_customer(customerId)
     return data
@@ -62,7 +62,7 @@ def resolve_orders_by_customer(_, info, customerId):
 
 @mutation.field("createOrder")
 def resolve_create_order(_, info, input: dict):
-    """Resolve create order mutation."""
+    """Резолвер мутации создания заказа."""
 
     customer_id = UUID(input["customerId"])
     items_input = input["items"]
@@ -80,7 +80,7 @@ def resolve_create_order(_, info, input: dict):
 
 @query.field("walletBalance")
 def resolve_wallet_balance(_, info, customerId: str):
-    """Resolve wallet balance query."""
+    """Резолвер запроса баланса кошелька."""
 
     balance = get_wallet_balance(customerId)
 
@@ -89,7 +89,7 @@ def resolve_wallet_balance(_, info, customerId: str):
 
 @mutation.field("capturePayment")
 def resolve_capture_payment(_, info, orderId: str):
-    """Resolve capture payment mutation."""
+    """Резолвер мутации подтверждения оплаты."""
 
     result = capture_payment(orderId)
 
@@ -97,7 +97,7 @@ def resolve_capture_payment(_, info, orderId: str):
 
 @mutation.field("refundOrder")
 def resolve_refund_order(_, info, orderId):
-    """Resolve refund order mutation."""
+    """Резолвер мутации возврата заказа."""
 
     result = refund_order(orderId)
 
@@ -119,13 +119,6 @@ def resolve_wallet_credit(_, info, input: dict):
     return result
 
 
-# TODO delete
-@order.field("items")
-def resolve_order_items(order_dict, info):
-    """Resolve order items."""
-    return []
-
-
 # Define custom scalars
 decimal_scalar = ScalarType("Decimal")
 uuid_scalar = ScalarType("UUID")
@@ -134,19 +127,19 @@ datetime_scalar = ScalarType("DateTime")
 
 @decimal_scalar.serializer
 def serialize_decimal(value):
-    """Serialize Decimal to string."""
+    """Сериализация Decimal в строку."""
     return str(value)
 
 
 @decimal_scalar.value_parser
 def parse_decimal_value(value):
-    """Parse Decimal from string."""
+    """Парсинг Decimal из строки."""
     return Decimal(str(value))
 
 
 @uuid_scalar.serializer
 def serialize_uuid(value):
-    """Serialize UUID to string."""
+    """Сериализация UUID в строку."""
     # Handle both UUID objects and strings
     if isinstance(value, UUID):
         return str(value)
@@ -163,21 +156,21 @@ def serialize_uuid(value):
 
 @uuid_scalar.value_parser
 def parse_uuid_value(value):
-    """Parse UUID from string."""
+    """Парсинг UUID из строки."""
     if isinstance(value, UUID):
         return value
     return UUID(str(value))
 
 @uuid_scalar.literal_parser
 def parse_uuid_literal(ast):
-    """Parse UUID from GraphQL literal."""
+    """Парсинг UUID из GraphQL-литерала."""
     value = str(ast.value)
     return UUID(value)
 
 
 @datetime_scalar.serializer
 def serialize_datetime(value):
-    """Serialize DateTime to ISO format string."""
+    """Сериализация DateTime в строку формата ISO."""
     if value is None:
         return None
     if isinstance(value, UUID):
@@ -189,7 +182,7 @@ def serialize_datetime(value):
 
 @datetime_scalar.value_parser
 def parse_datetime_value(value):
-    """Parse DateTime from string."""
+    """Парсинг DateTime из строки."""
 
     if value is None:
         return None

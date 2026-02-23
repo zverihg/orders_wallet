@@ -1,5 +1,5 @@
 """
-GraphQL view: схема и debug через app = GraphQL(schema, debug=True).
+GraphQL view: схема и отладка через app = GraphQL(schema, debug=True).
 """
 import json
 
@@ -19,7 +19,7 @@ app = GraphQL(schema, debug=True)
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def graphql_view(request):
-    """Django view для GraphQL (WSGI). Использует schema; debug из settings.DEBUG."""
+    """Django view для GraphQL (WSGI). Использует schema; отладка из settings.DEBUG."""
     if request.method == "GET":
         return JsonResponse({"message": "GraphQL endpoint. Use POST for queries."})
 

@@ -1,157 +1,87 @@
 """
-Domain model for Order aggregate.
+Доменная модель агрегата Заказ (Order).
 """
 from __future__ import annotations
 
 from decimal import Decimal
 from uuid import UUID
 
-from django.db import transaction
+from main.infra.repo import order_repo, customer_repo, wallet_repo
+from main.infra.repo.value_objects import CustomerObject, OrderObject, OrderItemObject
 
-from main.infra.models.wallet_models.models import WalletTransaction
-from main.infra.models.customer_models.models import Customer
-from main.infra.models.order_models.models import Order
-from main.infra.models.order_models.models import OrderItem
+def process_items(items_list):
 
-from main.domain.wallet import TransactionType
-
-def get_total_amount(items_list) -> Decimal:
-
+    items = []
     total = Decimal("0.00")
 
     for item in items_list:
-        total += item["price"] * item["quantity"]
 
-    return total
-
-
-def create_order(customer_id: UUID, items_list):
-
-    with transaction.atomic():
-        customer, _ = Customer.objects.get_or_create(
-            id=customer_id,
-            defaults={"name": str(customer_id)},
-        )
-
-        order = Order.objects.create(
-            customer=customer,
-            total_amount=get_total_amount(items_list),
-            status="DRAFT",
-        )
-
-        for item in items_list:
-
-            OrderItem.objects.create(
-                order=order,
+        items.append(
+            OrderItemObject(
                 product_id=item["productId"],
                 quantity=item["quantity"],
                 price=item["price"],
             )
+        )
 
-    return order.id, order.status
+        total += item["price"] * item["quantity"]
+
+    return items, total
+
+def create_order(customer_id: UUID, items_list):
+
+    customer_dict = customer_repo.get_customer_by_id(customer_id=customer_id)
+    customer = CustomerObject(id = customer_dict["pk"], name = customer_dict["name"])
+
+    items, total_amount = process_items(items_list)
+
+    order = OrderObject(
+        total_amount=total_amount,
+        status="DRAFT",
+        items=items,
+        customer=customer,
+    )
+
+    order_id, order_status = order_repo.create(order)
+
+    return order_id, order_status
 
 def get_order_by_id(order_id: UUID):
-    order = Order.objects.filter(id=order_id).select_related("customer").prefetch_related("items").first()
 
-    items = order.items.all()
+    order = order_repo.get_order_by_id(order_id=order_id)
+    return order
 
-    items_dict = [
-        {
-        "productId":item.product_id,
-        "quantity":item.quantity,
-        "price":item.price
-        }
-        for item in items]
+def get_orders_by_customer(customer_id):
 
-    data = {
-        "id": order.id,
-        "customerId": order.customer_id,
-        "status": order.status,
-        "totalAmount": order.total_amount,
-        "items": items_dict,
-        "createdAt": order.created_at,
-    }
+    orders = order_repo.get_orders_by_customer(customer_id=customer_id)
+    return orders
 
-    return data
+def capture_payment(order_id):
 
+    order = order_repo.get_order_by_id(order_id=order_id)
 
-def get_orders_by_customer(customerId):
+    customer = order.customer
 
-    orders = Order.objects.filter(customer_id=customerId)
-
-    orders_dict = [
-        {
-        "id":order.id,
-        "customerId":order.customer_id,
-        "status":order.status,
-        "totalAmount":order.total_amount,
-        "createdAt":order.created_at,
-        }
-        for order in orders]
-
-    data = {
-        "orders": orders_dict,
-        "totalCount": len(orders)
-    }
-
-    return data
-
-
-def capture_payment(orderId):
-
-    order = Order.objects.get(id=orderId)
-
-    wallet = order.customer.wallet
-
-    balance = Decimal(0)
-    for wallet_transaction in wallet.transactions.all():
-        if wallet_transaction.transaction_type == TransactionType.CREDIT:
-            balance += wallet_transaction.amount
-        elif wallet_transaction.transaction_type == TransactionType.DEBIT:
-            balance -= wallet_transaction.amount
-        else:
-            pass
+    balance = wallet_repo.get_wallet_balance(customer_id=customer.pk)
 
     if balance < order.total_amount:
         raise ValueError("Insufficient balance for payment")
 
-    with transaction.atomic():
-
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            transaction_type=TransactionType.DEBIT,
-            amount=order.total_amount,
-            description=f"Payment for order {order.id}",
-        )
-
-        order.status = "PAID"
-        order.save()
+    status = wallet_repo.capture_payment(order_id=order_id)
 
     return {
-        "orderId": str(orderId),
-        "status": order.status,
-        "amountDebited": str(order.total_amount)
+        "orderId": order_id,
+        "status": status,
+        "amountDebited": order.total_amount
     }
 
+def refund_order(order_id:str):
 
-def refund_order(orderId:str):
-
-    order = Order.objects.get(id=orderId)
-    wallet = order.customer.wallet
+    order = order_repo.get_order_by_id(order_id=order_id)
 
     if order.status != "PAID":
         raise ValueError("Order is not paid")
 
-    with transaction.atomic():
+    status = wallet_repo.refund_order(order_id=order_id)
 
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            transaction_type=TransactionType.CREDIT,
-            amount=order.total_amount,
-            description=f"Payment for order {order.id}",
-        )
-
-        order.status = "REFUNDED"
-        order.save()
-
-    return {"orderId": str(orderId), "status": order.status}
+    return {"orderId": order_id, "status": status}

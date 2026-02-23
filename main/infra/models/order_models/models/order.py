@@ -4,17 +4,18 @@ from uuid import uuid4
 from main.infra.models.service_models.models.base_timestamp_model import TimeStampedModel
 
 from main.infra.models.customer_models.models import Customer
+from enum import Enum
+
+
+class OrderStatus(Enum):
+    DRAFT = "DRAFT"
+    PENDING = "PENDING"
+    PAID = "PAID"
+    REFUNDED = "REFUNDED"
+    CANCELLED = "CANCELLED"
 
 
 class Order(TimeStampedModel):
-
-    STATUS_CHOICES = (
-        ("DRAFT", "Черновик"),
-        ("PENDING", "В обработке"),
-        ("PAID", 'Оплачен'),
-        ("REFUNDED", 'Возврат'),
-        ("CANCELLED", 'Отменён'),
-    )
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
@@ -24,7 +25,7 @@ class Order(TimeStampedModel):
         related_name="orders",
     )
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(choices=STATUS_CHOICES)
+    status = models.CharField(choices=OrderStatus)
 
     class Meta:
         indexes = [
