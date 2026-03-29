@@ -7,14 +7,20 @@ from django.db import transaction
 from main.domain.errors import DomainError
 from main.domain.idempotency import run_idempotent
 from main.infra.models.order_models.models import Order, OrderStatus
-from main.infra.models.wallet_models.models import TransactionType, Wallet, WalletTransaction
+from main.infra.models.wallet_models.models import (
+    TransactionType,
+    Wallet,
+    WalletTransaction,
+)
 
 from .base import BaseOrderService
 
 
 class OrderPaymentService(BaseOrderService):
     @transaction.atomic
-    def capture_payment(self, order_id: UUID, idempotency_key: str | None = None) -> dict:
+    def capture_payment(
+        self, order_id: UUID, idempotency_key: str | None = None
+    ) -> dict:
         def _capture():
             order = (
                 Order.objects.select_for_update()
@@ -27,15 +33,24 @@ class OrderPaymentService(BaseOrderService):
                 raise DomainError(code="ORDER_NOT_FOUND", message="Order not found")
 
             if order.status not in (OrderStatus.DRAFT.value, OrderStatus.PENDING.value):
-                raise DomainError(code="ORDER_NOT_PAYABLE", message="Order is not payable")
+                raise DomainError(
+                    code="ORDER_NOT_PAYABLE", message="Order is not payable"
+                )
 
-            wallet = Wallet.objects.select_for_update().filter(customer=order.customer).first()
+            wallet = (
+                Wallet.objects.select_for_update()
+                .filter(customer=order.customer)
+                .first()
+            )
             if not wallet:
                 raise DomainError(code="WALLET_NOT_FOUND", message="Wallet not found")
 
             balance = self._wallet_balance(wallet)
             if balance < order.total_amount:
-                raise DomainError(code="INSUFFICIENT_BALANCE", message="Insufficient balance for payment")
+                raise DomainError(
+                    code="INSUFFICIENT_BALANCE",
+                    message="Insufficient balance for payment",
+                )
 
             WalletTransaction.objects.create(
                 wallet=wallet,

@@ -14,7 +14,11 @@ from main.domain.wallet.services import WalletCommandService
 from main.infra.models.customer_models.models import Customer
 from main.infra.models.order_models.models import Order, OrderStatus
 from main.infra.models.service_models.models import IdempotencyKey
-from main.infra.models.wallet_models.models import TransactionType, Wallet, WalletTransaction
+from main.infra.models.wallet_models.models import (
+    TransactionType,
+    Wallet,
+    WalletTransaction,
+)
 
 
 def _create_customer_with_wallet(*, balance: Decimal) -> tuple[Customer, Wallet]:
@@ -57,14 +61,20 @@ def test_capture_payment_is_idempotent_by_key():
 
     assert result_1 == result_2
     assert Order.objects.get(id=order.id).status == OrderStatus.PAID.value
-    assert WalletTransaction.objects.filter(
-        wallet=wallet,
-        transaction_type=TransactionType.DEBIT.value,
-    ).count() == 1
-    assert IdempotencyKey.objects.filter(
-        key="capture-key-1",
-        operation="CAPTURE_PAYMENT",
-    ).count() == 1
+    assert (
+        WalletTransaction.objects.filter(
+            wallet=wallet,
+            transaction_type=TransactionType.DEBIT.value,
+        ).count()
+        == 1
+    )
+    assert (
+        IdempotencyKey.objects.filter(
+            key="capture-key-1",
+            operation="CAPTURE_PAYMENT",
+        ).count()
+        == 1
+    )
 
 
 @pytest.mark.django_db
@@ -75,7 +85,9 @@ def test_wallet_debit_rejects_same_key_with_different_payload():
     service.wallet_debit(customer.id, Decimal("100.00"), idempotency_key="wallet-key-1")
 
     with pytest.raises(DomainError) as exc_info:
-        service.wallet_debit(customer.id, Decimal("200.00"), idempotency_key="wallet-key-1")
+        service.wallet_debit(
+            customer.id, Decimal("200.00"), idempotency_key="wallet-key-1"
+        )
 
     assert exc_info.value.code == "IDEMPOTENCY_KEY_REUSED"
 

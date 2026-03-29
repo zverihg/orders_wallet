@@ -16,4 +16,6 @@ def resolve_get_order(_, info, id):
 
 @query.field("OrdersByCustomer")
 def resolve_orders_by_customer(_, info, customerId, limit=50, offset=0):
-    return run_with_hybrid_errors(lambda: get_orders_by_customer(customerId, limit=limit, offset=offset))
+    return run_with_hybrid_errors(
+        lambda: get_orders_by_customer(customerId, limit=limit, offset=offset)
+    )

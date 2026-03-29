@@ -16,7 +16,9 @@ class OrderCommandService(BaseOrderService):
     def create_order(self, customer_id: UUID, items_list: list[dict]) -> dict:
         customer = self._get_customer(customer_id=customer_id)
         if not items_list:
-            raise DomainError(code="ORDER_EMPTY", message="Order must contain at least one item")
+            raise DomainError(
+                code="ORDER_EMPTY", message="Order must contain at least one item"
+            )
 
         total_amount = Decimal("0.00")
         order_items = []

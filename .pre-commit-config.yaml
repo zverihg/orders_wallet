@@ -1,0 +1,30 @@
+default_language_version:
+    python: python3
+
+
+default_stages: [pre-commit]
+
+exclude: ^(.*\/migrations\/|.*\/locales\/|.*\.po|.*\.mo|.*\/ecoplatform_protos\/)
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-ast
+      - id: check-json
+      - id: pretty-format-json
+        args: [
+          --autofix,
+        ]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.4
+    hooks:
+      - id: ruff
+        args: [
+          --fix
+        ]
+      - id: ruff-format

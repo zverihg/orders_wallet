@@ -4,21 +4,32 @@ from decimal import Decimal
 from uuid import UUID
 
 from main.domain.errors import DomainError
-from main.infra.models.wallet_models.models import TransactionType, Wallet, WalletTransaction
+from main.infra.models.wallet_models.models import (
+    TransactionType,
+    Wallet,
+    WalletTransaction,
+)
 
 
 class BaseWalletService:
     def _get_wallet(self, customer_id: UUID) -> Wallet:
         try:
-            return Wallet.objects.prefetch_related("transactions").get(customer_id=customer_id)
+            return Wallet.objects.prefetch_related("transactions").get(
+                customer_id=customer_id
+            )
         except Wallet.DoesNotExist as exc:
-            raise DomainError(code="WALLET_NOT_FOUND", message="Wallet not found") from exc
+            raise DomainError(
+                code="WALLET_NOT_FOUND", message="Wallet not found"
+            ) from exc
 
     def _to_transaction_type_value(self, operation_type: str) -> str:
         try:
             return TransactionType(operation_type).value
         except ValueError as exc:
-            raise DomainError(code="UNSUPPORTED_WALLET_OPERATION", message="Unsupported wallet operation") from exc
+            raise DomainError(
+                code="UNSUPPORTED_WALLET_OPERATION",
+                message="Unsupported wallet operation",
+            ) from exc
 
     def _balance_from_wallet(self, wallet: Wallet) -> Decimal:
         balance = Decimal("0.00")
@@ -39,7 +50,9 @@ class BaseWalletService:
         description: str = "",
     ) -> WalletTransaction:
         if amount <= Decimal("0"):
-            raise DomainError(code="INVALID_AMOUNT", message="Amount must be greater than zero")
+            raise DomainError(
+                code="INVALID_AMOUNT", message="Amount must be greater than zero"
+            )
         transaction_type = self._to_transaction_type_value(operation_type)
         return WalletTransaction.objects.create(
             wallet=wallet,

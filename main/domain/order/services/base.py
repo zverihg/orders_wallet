@@ -16,27 +16,43 @@ class BaseOrderService:
         try:
             return Customer.objects.get(id=customer_id)
         except Customer.DoesNotExist as exc:
-            raise DomainError(code="CUSTOMER_NOT_FOUND", message="Customer not found") from exc
+            raise DomainError(
+                code="CUSTOMER_NOT_FOUND", message="Customer not found"
+            ) from exc
 
     def _get_order(self, order_id: UUID) -> Order:
         try:
-            return Order.objects.select_related("customer").prefetch_related("items").get(id=order_id)
+            return (
+                Order.objects.select_related("customer")
+                .prefetch_related("items")
+                .get(id=order_id)
+            )
         except Order.DoesNotExist as exc:
-            raise DomainError(code="ORDER_NOT_FOUND", message="Order not found") from exc
+            raise DomainError(
+                code="ORDER_NOT_FOUND", message="Order not found"
+            ) from exc
 
     def _get_wallet(self, customer: Customer) -> Wallet:
         try:
             return customer.wallet
         except ObjectDoesNotExist as exc:
-            raise DomainError(code="WALLET_NOT_FOUND", message="Wallet not found") from exc
+            raise DomainError(
+                code="WALLET_NOT_FOUND", message="Wallet not found"
+            ) from exc
 
     def _wallet_balance(self, wallet: Wallet) -> Decimal:
         balance = Decimal("0.00")
         for transaction in wallet.transactions.all():
             transaction_type = transaction.transaction_type
-            if transaction_type in (TransactionType.CREDIT, TransactionType.CREDIT.value):
+            if transaction_type in (
+                TransactionType.CREDIT,
+                TransactionType.CREDIT.value,
+            ):
                 balance += transaction.amount
-            elif transaction_type in (TransactionType.DEBIT, TransactionType.DEBIT.value):
+            elif transaction_type in (
+                TransactionType.DEBIT,
+                TransactionType.DEBIT.value,
+            ):
                 balance -= transaction.amount
         return balance
 

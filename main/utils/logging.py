@@ -1,6 +1,7 @@
 """
 Кастомный JSON-форматтер для логирования (без внешних зависимостей).
 """
+
 import json
 import logging
 from datetime import datetime
@@ -40,4 +41,3 @@ class JsonFormatter(logging.Formatter):
             log_data["exception"] = self.formatException(record.exc_info)
 
         return json.dumps(log_data, ensure_ascii=False)
-

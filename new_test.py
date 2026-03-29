@@ -13,18 +13,20 @@ class GraphQLClient:
     def __init__(self, base_url: str = GRAPHQL_ENDPOINT):
         self.base_url = base_url
         self.session = requests.Session()
-        self.session.headers.update({
-            "Content-Type": "application/json",
-        })
+        self.session.headers.update(
+            {
+                "Content-Type": "application/json",
+            }
+        )
 
     def execute(
-            self,
-            query: str,
-            variables: dict = None,
-            operation_name: str = None,
-            idempotency_key: str = None,
-            request_id: str = None,
-            user_id: str = None,
+        self,
+        query: str,
+        variables: dict = None,
+        operation_name: str = None,
+        idempotency_key: str = None,
+        request_id: str = None,
+        user_id: str = None,
     ) -> dict:
         """Выполнить GraphQL запрос."""
         payload = {
@@ -51,7 +53,6 @@ class GraphQLClient:
 
         response.raise_for_status()
         return response.json()
-
 
 
 def create_order(client: GraphQLClient, customer_id: str, items: list) -> str:
@@ -102,15 +103,15 @@ def create_order(client: GraphQLClient, customer_id: str, items: list) -> str:
 
         return order_id
     except Exception as e:
-
         print(False, f"Ошибка создания заказа: {e}")
-        if hasattr(e, 'response') and e.response is not None:
+        if hasattr(e, "response") and e.response is not None:
             try:
                 error_data = e.response.json()
                 print(False, f"Детали ошибки: {error_data}")
-            except:
+            except Exception:
                 pass
         return None
+
 
 def get_order(client: GraphQLClient, order_id: str):
     """Тест получения заказа через API."""
@@ -146,6 +147,7 @@ def get_order(client: GraphQLClient, order_id: str):
         print(False, f"Ошибка получения заказа: {e}")
         return None
 
+
 def get_orders_by_customer(client: GraphQLClient, customer_id: str):
     query = """
         query OrdersByCustomer($customerId: UUID!) {
@@ -175,6 +177,7 @@ def get_orders_by_customer(client: GraphQLClient, customer_id: str):
         print(False, f"Ошибка получения заказа: {e}")
         return None
 
+
 def get_balance(client: GraphQLClient, customer_id: str):
     query = """
         query walletBalance($customerId: UUID!) {
@@ -199,6 +202,7 @@ def get_balance(client: GraphQLClient, customer_id: str):
     except Exception as e:
         print(False, f"Ошибка получения заказа: {e}")
         return None
+
 
 def capture_payment(orderId: str):
     query = """
@@ -225,6 +229,7 @@ def capture_payment(orderId: str):
         print(False, f"Ошибка получения заказа: {e}")
         return None
 
+
 def refund_order(orderId: str):
     query = """
         mutation refundOrder($orderId: UUID!) {
@@ -249,6 +254,7 @@ def refund_order(orderId: str):
         print(False, f"Ошибка получения заказа: {e}")
         return None
 
+
 def wallet_debit(client: GraphQLClient, customerId: str, amount: int):
     query = """
         mutation walletDebit($input: walletOperationsInput!) {
@@ -257,12 +263,7 @@ def wallet_debit(client: GraphQLClient, customerId: str, amount: int):
             }
         }
     """
-    variables = {
-        "input": {
-            "customerId": customerId,
-            "amount":amount
-        }
-    }
+    variables = {"input": {"customerId": customerId, "amount": amount}}
 
     try:
         response = client.execute(
@@ -286,12 +287,7 @@ def wallet_credit(client: GraphQLClient, customerId: str, amount: int):
             }
         }
     """
-    variables = {
-        "input": {
-            "customerId": customerId,
-            "amount":amount
-        }
-    }
+    variables = {"input": {"customerId": customerId, "amount": amount}}
 
     try:
         response = client.execute(
@@ -328,6 +324,5 @@ if __name__ == "__main__":
     # refund_order(order_id)
 
     wallet_credit(client, customer_id, 5000)
-
 
     get_balance(client, customer_id)

@@ -14,7 +14,9 @@ from .base import BaseWalletService
 
 class WalletCommandService(BaseWalletService):
     @transaction.atomic
-    def wallet_debit(self, customer_id: UUID, amount: Decimal, idempotency_key: str | None = None) -> dict:
+    def wallet_debit(
+        self, customer_id: UUID, amount: Decimal, idempotency_key: str | None = None
+    ) -> dict:
         def _debit():
             wallet = (
                 Wallet.objects.select_for_update()
@@ -27,7 +29,10 @@ class WalletCommandService(BaseWalletService):
 
             current_balance = self._balance_from_wallet(wallet)
             if amount > current_balance:
-                raise DomainError(code="WALLET_INSUFFICIENT_BALANCE", message="Insufficient wallet balance")
+                raise DomainError(
+                    code="WALLET_INSUFFICIENT_BALANCE",
+                    message="Insufficient wallet balance",
+                )
             self._create_transaction(
                 wallet=wallet,
                 operation_type=TransactionType.DEBIT.value,

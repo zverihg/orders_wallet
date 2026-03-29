@@ -19,7 +19,9 @@ class OrderQueryService(BaseOrderService):
             return None
         return self._serialize_order(order)
 
-    def get_orders_by_customer(self, customer_id: UUID, *, limit: int = 50, offset: int = 0) -> dict:
+    def get_orders_by_customer(
+        self, customer_id: UUID, *, limit: int = 50, offset: int = 0
+    ) -> dict:
         limit = max(1, min(int(limit), 100))
         offset = max(0, int(offset))
         orders_queryset = (

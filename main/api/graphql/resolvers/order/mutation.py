@@ -26,11 +26,17 @@ def _idempotency_key_from_context(info) -> str | None:
 @mutation.field("createOrder")
 def resolve_create_order(_, info, input: dict):
     customer_id_raw = input["customerId"]
-    customer_id = customer_id_raw if isinstance(customer_id_raw, UUID) else UUID(str(customer_id_raw))
+    customer_id = (
+        customer_id_raw
+        if isinstance(customer_id_raw, UUID)
+        else UUID(str(customer_id_raw))
+    )
     items_input = input["items"]
     items_list = [
         {
-            "productId": item["productId"] if isinstance(item["productId"], UUID) else UUID(str(item["productId"])),
+            "productId": item["productId"]
+            if isinstance(item["productId"], UUID)
+            else UUID(str(item["productId"])),
             "quantity": item["quantity"],
             "price": Decimal(str(item["price"])),
         }

@@ -1,7 +1,9 @@
 from django.db import models
 from uuid import uuid4
 
-from main.infra.models.service_models.models.base_timestamp_model import TimeStampedModel
+from main.infra.models.service_models.models.base_timestamp_model import (
+    TimeStampedModel,
+)
 
 
 class Customer(TimeStampedModel):
@@ -12,4 +14,3 @@ class Customer(TimeStampedModel):
         indexes = [
             models.Index(fields=("id",)),
         ]
-

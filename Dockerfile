@@ -14,4 +14,3 @@ ARG DJANGO_SETTINGS_MODULE=systeme
 ENV SYSTEME_DJANGO_MOD $SYSTEME_DJANGO_MOD
 
 RUN pip install -r requirements.txt
-

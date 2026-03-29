@@ -25,11 +25,15 @@ def run_idempotent(
         return handler()
 
     request_hash = _request_hash(payload)
-    existing = IdempotencyKey.objects.select_for_update().filter(
-        key=key,
-        user_id=user_id,
-        operation=operation,
-    ).first()
+    existing = (
+        IdempotencyKey.objects.select_for_update()
+        .filter(
+            key=key,
+            user_id=user_id,
+            operation=operation,
+        )
+        .first()
+    )
 
     if existing:
         if existing.request_hash != request_hash:
@@ -48,4 +52,3 @@ def run_idempotent(
         response_payload=response_payload,
     )
     return response_payload
-

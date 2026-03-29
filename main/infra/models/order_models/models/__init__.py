@@ -1,3 +1,3 @@
-from .order import Order
-from .order_item import OrderItem
-from .order import OrderStatus
+from .order import Order as Order
+from .order import OrderStatus as OrderStatus
+from .order_item import OrderItem as OrderItem
