@@ -32,3 +32,9 @@ class Order(TimeStampedModel):
             models.Index(fields=("customer", "status")),
             models.Index(fields=("customer",)),
         ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(total_amount__gte=0),
+                name="order_total_amount_gte_0",
+            ),
+        ]

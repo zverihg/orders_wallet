@@ -1,19 +1,23 @@
-"""
-GraphQL view: схема и отладка через app = GraphQL(schema, debug=True).
-"""
 import json
 
 from ariadne.asgi import GraphQL
 from ariadne import graphql_sync
+from ariadne.explorer import ExplorerGraphiQL
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from main.api.schema import schema
+from main.api.graphql.schema import schema
 
 # Схема с включённым debug (стектрейсы и контекст в errors).
+# GraphiQL + plugin-explorer: клики по полям в левой панели собирают запрос.
 # Для полного debug через ASGI: в asgi.py смонтировать app по пути /graphql.
-app = GraphQL(schema, debug=True)
+app = GraphQL(
+    schema,
+    debug=settings.DEBUG,
+    explorer=ExplorerGraphiQL(title="orders_wallet GraphQL", explorer_plugin=True),
+)
 
 
 @csrf_exempt

@@ -28,3 +28,9 @@ class WalletTransaction(TimeStampedModel):
             models.Index(fields=("wallet",)),
             models.Index(fields=("wallet", "created_at")),
         ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(amount__gt=0),
+                name="wallet_tx_amount_gt_0",
+            ),
+        ]

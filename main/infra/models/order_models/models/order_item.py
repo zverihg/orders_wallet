@@ -21,4 +21,14 @@ class OrderItem(TimeStampedModel):
         indexes = [
             models.Index(fields=("order",)),
         ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(quantity__gt=0),
+                name="order_item_quantity_gt_0",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(price__gte=0),
+                name="order_item_price_gte_0",
+            ),
+        ]
 

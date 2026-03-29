@@ -7,6 +7,7 @@ OPERATION_TYPE = (
     ("CREATE_ORDER", "Создание заказа"),
     ("CAPTURE_PAYMENT", "Подтверждение оплаты"),
     ("REFUND_ORDER", "Возврат заказа"),
+    ("WALLET_DEBIT", "Списание кошелька"),
 )
 
 

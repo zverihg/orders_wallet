@@ -1,34 +1,43 @@
 type OrdersByCustomerResult {
   orders: [Order!]!
   totalCount: Int!
+  limit: Int!
+  offset: Int!
+  hasNextPage: Boolean!
 }
 
 input CreateOrderInput {
-  customerId: String!
+  customerId: UUID!
   items: [OrderItemInput!]!
 }
 
 input OrderItemInput {
-  productId: String!
+  productId: UUID!
   quantity: Int!
   price: Decimal!
 }
 
 type CreateOrderPayload {
-  orderId: String!
+  orderId: UUID
   status: String!
+  errorCode: String
+  errorMessage: String
 }
 
 type CapturePaymentPayload {
   orderId: UUID!
   status: String!
-  amountDebited: Decimal!
+  amountDebited: Decimal
+  errorCode: String
+  errorMessage: String
 }
 
 type RefundOrderPayload {
   orderId: UUID!
   status: String!
-  amountRefunded: Decimal!
+  amountRefunded: Decimal
+  errorCode: String
+  errorMessage: String
 }
 
 type Order {
@@ -48,12 +57,16 @@ type OrderItem {
 }
 
 type WalletBalance {
-  customerId: String!
-  balance: Decimal!
+  customerId: UUID!
+  balance: Decimal
+  errorCode: String
+  errorMessage: String
 }
 
 type walletOperationsPayload{
   status: String!
+  errorCode: String
+  errorMessage: String
 }
 
 input walletOperationsInput{

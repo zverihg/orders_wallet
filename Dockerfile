@@ -5,11 +5,7 @@ WORKDIR /usr/src/app
 # Копируем файл requirements.txt внутрь контейнера
 COPY requirements.txt ./
 # Устанавливаем зависимости, описанные в файле requirements.txt
-RUN apt-get update && apt-get install -y zsh
-# Optional: Set Zsh as the default shell for the root user
-RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
-RUN chsh -s /bin/zsh root
-
+RUN apt-get update
 #give ARG RAILS_ENV a default value = production
 ARG SYSTEME_DJANGO_MOD=DOCKER
 ARG DJANGO_SETTINGS_MODULE=systeme

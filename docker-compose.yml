@@ -1,34 +1,35 @@
+# Общие настройки для dev-контейнеров Django (код на хосте, одна БД).
+x-django-dev: &django-dev
+  build: .
+  volumes:
+    - .:/usr/src/app
+  environment:
+    - DJANGO_SETTINGS_MODULE=orders_wallet.settings
+  depends_on:
+    - pgdb
+
 # Определение версии Docker Compose и начало описания сервисов
 
 services:
   # для удобства в IDE и запусках тестов
   alpine-django:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *django-dev
     container_name: order-alpine
-    volumes:
-      - .:/usr/src/app
-    environment:
-      - DJANGO_SETTINGS_MODULE=orders_wallet.settings
-    depends_on:
-      - pgdb
 
   django:
-    # Сборка образа для сервиса django из текущей директории
-    build: .
-    # Задание имени контейнера для сервиса django
+    <<: *django-dev
     container_name: order_django
-    # Задание команды, которую нужно запустить при запуске контейнера для сервиса django
     command: python manage.py runserver 0.0.0.0:8000 #python3 manage.py runserver_plus --cert-file cert.pem --key-file key.pem  #
-    volumes:
-      - .:/usr/src/app
-    # Открытие порта на хостовой машине и перенаправление на порт в контейнере
     ports:
       - 8000:8000
-    # Зависимость от другого сервиса
-    depends_on:
-      - pgdb
+
+  # ASGI + Ariadne: GraphiQL с Explorer (клики по схеме) — http://localhost:4000/graphql/
+  graphql-ariadne:
+    <<: *django-dev
+    container_name: orders_wallet-graphql-ariadne
+    ports:
+      - '4000:4000'
+    command: uvicorn orders_wallet.asgi:application --host 0.0.0.0 --port 4000
 
   pgdb:
     # Использование готового образа postgres
@@ -38,8 +39,8 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-     # Задание имени контейнера для сервиса pgdb
-    container_name: pgdb
+     # Задание имени контейнера для сервиса pgdb (уникально для проекта, чтобы не конфликтовать с другими pgdb)
+    container_name: orders_wallet_pgdb
     ports:
       - 5433:5432
      # Связывание тома с директорией в контейнере для сохранения данных postgres
